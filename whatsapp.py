@@ -63,30 +63,32 @@ class Whatsapp:
 def download_of_images_and_classify():
     with Whatsapp() as whats:
         for contact in contacts:
-            print("Iniciando envio de mensagem para", contact["nome"])
-            whats.find_contact(contact=contact["nome"])
+            print("Iniciando envio de mensagem para", contacts[contact]["nome"])
+            whats.find_contact(contact=contacts[contact]["nome"])
             print("Baixando imagens ...")
             whats.get_all_images()
             print("Classificando imagens ...")
             print("#" * 100)
             classificar_imagem_e_apaga = lambda title: print(f"Classificando {title}")
-            classificar_imagem_e_apaga(title=contact["titulo"])
+            classificar_imagem_e_apaga(title=contacts[contact]["titulo"])
             print("#" * 100)
 
-            print(f"Enviando mensagem image {contact['filename']}.png ...")
+            print(f"Enviando mensagem image {contacts[contact]['filename']}.png ...")
 
             whats.send_message_image(
                 full_path_file=os.path.join(
-                    os.getcwd(), "resources", f"{contact['filename']}.png"
+                    os.getcwd(), "resources", f"{contacts[contact]['filename']}.png"
                 )
             )
             for i in range(1, 4):
                 print(
-                    f"Enviando mensagem attachment {i} {contact['filename']}_parte{i}.pdf ..."
+                    f"Enviando mensagem attachment {i} {contacts[contact]['filename']}_parte{i}.pdf ..."
                 )
                 whats.send_message_attachment(
                     full_path_file=os.path.join(
-                        os.getcwd(), "resources", f"{contact['filename']}_parte{i}.pdf"
+                        os.getcwd(),
+                        "resources",
+                        f"{contacts[contact]['filename']}_parte{i}.pdf",
                     )
                 )
 
@@ -109,7 +111,8 @@ def send_report_to_contacts(
 
 
 if __name__ == "__main__":
-    # download_of_images_and_classify()
+
+    download_of_images_and_classify()
     pdfs_vila = [
         os.path.join("resources", file)
         for file in os.listdir("resources")
