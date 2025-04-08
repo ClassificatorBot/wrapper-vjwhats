@@ -1,9 +1,9 @@
 import os
-import time
 from vjwhats import WhatsApp
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from pathlib import Path
+from consts import contacts
 
 
 class Whatsapp:
@@ -60,35 +60,81 @@ class Whatsapp:
         self.whatsapp.find_by_username(contact)
 
 
-with Whatsapp() as whats:
-    contacts = {
-        "+5519998722472": ("relatorio_Vila Bela", "Vila Bela"),
-        "+14997526985": ("relatorio_Juruena", "Juruena"),
-    }
-    for contact in contacts:
-        print("Iniciando envio de mensagem para", contact)
-        whats.find_contact(contact=contact)
-        print("Baixando imagens ...")
-        whats.get_all_images()
-        print("Classificando imagens ...")
-        print("#" * 100)
-        classificar_imagem_e_apaga = lambda title: print(f"Classificando {title}")
-        classificar_imagem_e_apaga(title=contacts[contact[1]])
-        print("#" * 100)
+def download_of_images_and_classify():
+    with Whatsapp() as whats:
+        for contact in contacts:
+            print("Iniciando envio de mensagem para", contact["nome"])
+            whats.find_contact(contact=contact["nome"])
+            print("Baixando imagens ...")
+            whats.get_all_images()
+            print("Classificando imagens ...")
+            print("#" * 100)
+            classificar_imagem_e_apaga = lambda title: print(f"Classificando {title}")
+            classificar_imagem_e_apaga(title=contact["titulo"])
+            print("#" * 100)
 
-        print(f"Enviando mensagem image {contacts[contact[0]]}.png ...")
+            print(f"Enviando mensagem image {contact['filename']}.png ...")
 
-        whats.send_message_image(
-            full_path_file=os.path.join(
-                os.getcwd(), "resources", f"{contacts[contact[0]]}.png"
-            )
-        )
-        for i in range(1, 4):
-            print(
-                f"Enviando mensagem attachment {i} {contacts[contact[0]]}_parte{i}.pdf ..."
-            )
-            whats.send_message_attachment(
+            whats.send_message_image(
                 full_path_file=os.path.join(
-                    os.getcwd(), "resources", f"{contacts[contact[0]]}_parte{i}.pdf"
+                    os.getcwd(), "resources", f"{contact['filename']}.png"
                 )
             )
+            for i in range(1, 4):
+                print(
+                    f"Enviando mensagem attachment {i} {contact['filename']}_parte{i}.pdf ..."
+                )
+                whats.send_message_attachment(
+                    full_path_file=os.path.join(
+                        os.getcwd(), "resources", f"{contact['filename']}_parte{i}.pdf"
+                    )
+                )
+
+
+def send_report_to_contacts(
+    contacts: list = ["PROD Robo Classif WPP Concepcion"],
+    reports={"pdfs": [], "img": ""},
+):
+    with Whatsapp() as whats:
+        for contact in contacts:
+            print(f"Enviando mensagem texto {contact} ...")
+            whats.find_contact(contact=contact)
+            if not reports["img"] or not reports["pdfs"]:
+                print("Imagem e Relatorios não podem ser nulos.")
+                return
+            whats.send_message_image(full_path_file=reports["img"])
+            for pdf in reports["pdfs"]:
+                whats.send_message_attachment(full_path_file=pdf)
+                print("Mensagem enviada com sucesso!")
+
+
+if __name__ == "__main__":
+    # download_of_images_and_classify()
+    pdfs_vila = [
+        os.path.join("resources", file)
+        for file in os.listdir("resources")
+        if file.endswith(".pdf") and "Vila Bela_" in file
+    ]
+    img_vila = [
+        os.path.join("resources", file)
+        for file in os.listdir("resources")
+        if file.endswith(".png") and "Vila Bela" in file
+    ]
+    pdfs_juruena = [
+        os.path.join("resources", file)
+        for file in os.listdir("resources")
+        if file.endswith(".pdf") and "Juruena_" in file
+    ]
+    img_juruena = [
+        os.path.join("resources", file)
+        for file in os.listdir("resources")
+        if file.endswith(".png") and "Juruena" in file
+    ]
+    send_report_to_contacts(
+        contacts=["+5519998722472", "+5514998778713"],
+        reports={"pdfs": pdfs_vila, "img": img_vila[0]},
+    )
+    send_report_to_contacts(
+        contacts=["+5519998722472", "+5514998778713"],
+        reports={"pdfs": pdfs_juruena, "img": img_juruena[0]},
+    )
