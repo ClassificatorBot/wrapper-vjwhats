@@ -67,6 +67,7 @@ with Whatsapp() as whats:
         "name": "+5519998722472",  # DESV Robo Classif Cams Concepcion
         "image": "relatorio",
         "pdf": "Relatorio_Final",
+        "feedback": "feedbacks_histogram",
     }
     print("Iniciando envio de mensagem para", contact)
     whats.find_contact(contact=contact["name"])
@@ -74,9 +75,14 @@ with Whatsapp() as whats:
     print(f"Enviando mensagem image relatorio.png ...")
 
     whats.send_message_image(full_path_file=os.path.join(BASE_PATH, contact["image"]))
-    for i in range(1, 4):
+    for i in range(1, 5):
         filename = f'{contact["pdf"]}_{i}'
         print(f"Enviando mensagem attachment {i} {filename}.pdf ...")
         whats.send_message_attachment(
             full_path_file=os.path.join(BASE_PATH, f"{filename}.pdf")
         )
+
+    print(f"Enviando mensagem image feedbacks_histogram.png ...")
+    whats.send_message_image(
+        full_path_file=os.path.join(BASE_PATH, f'{contact["feedback"]}.png')
+    )
